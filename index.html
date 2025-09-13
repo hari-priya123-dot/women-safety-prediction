@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafePath - Women Safety Prediction System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .safety-low { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); }
+        .safety-moderate { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+        .safety-high { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+        .safety-very-high { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+        
+        .emergency-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Navigation -->
+    <nav class="bg-white bg-opacity-90 backdrop-blur-sm shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-shield-alt text-purple-600 text-2xl"></i>
+                    </div>
+                    <div class="ml-3 text-xl font-bold text-purple-700">SafePath</div>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="text-gray-700 hover:text-purple-600 transition-colors">Home</a>
+                    <a href="#predict" class="text-gray-700 hover:text-purple-600 transition-colors">Safety Predict</a>
+                    <a href="#resources" class="text-gray-700 hover:text-purple-600 transition-colors">Resources</a>
+                    <a href="#emergency" class="text-gray-700 hover:text-purple-600 transition-colors">Emergency</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="mb-8">
+                <img src="image.jpg" alt="Group of diverse women walking confidently in a city with sunset lighting and safety symbols surrounding them" class="rounded-2xl shadow-2xl mx-auto mb-6" />
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">Your Safety, Our Priority</h1>
+            <p class="text-xl text-white opacity-90 mb-8 max-w-3xl mx-auto">
+                SafePath uses AI-powered prediction to help women navigate safely. Get real-time safety alerts, emergency assistance, and personalized safety recommendations.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="scrollToSection('predict')" class="bg-white text-purple-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg">
+                    Check Safety Now
+                </button>
+                <button onclick="scrollToSection('emergency')" class="border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white hover:text-purple-600 transition-colors">
+                    Emergency Help
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Safety Prediction Section -->
+    <section id="predict" class="py-16 bg-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">Safety Prediction Tool</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-gray-50 p-8 rounded-2xl shadow-lg">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6">Enter Your Journey Details</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Current Location</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="currentLocation" placeholder="Enter your location" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <button onclick="getCurrentLocation()" class="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                    <i class="fas fa-location-arrow"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Destination</label>
+                            <input type="text" id="destination" placeholder="Where are you going?" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Time of Travel</label>
+                            <input type="time" id="travelTime" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mode of Transport</label>
+                            <select id="transportMode" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="walking">Walking</option>
+                                <option value="public">Public Transport</option>
+                                <option value="private">Private Vehicle</option>
+                                <option value="ride">Ride Share</option>
+                            </select>
+                        </div>
+                        
+                        <button onclick="predictSafety()" class="w-full bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                            Predict Safety Level
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-8 rounded-2xl shadow-lg">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6">Safety Prediction Results</h3>
+                    <div id="predictionResult" class="text-center py-12 rounded-lg mb-6">
+                        <div class="text-gray-500">
+                            <i class="fas fa-search-location text-4xl mb-4"></i>
+                            <p>Enter your journey details to get safety prediction</p>
+                        </div>
+                    </div>
+                    
+                    <div id="safetyTips" class="bg-white p-6 rounded-lg shadow-inner">
+                        <h4 class="font-semibold text-gray-800 mb-4">Safety Tips</h4>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>Share your live location with trusted contacts</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>Keep emergency numbers on speed dial</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>Stay in well-lit areas with people around</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            
+            </div>
+        </div>
+    </section>
+
+    <!-- Emergency Section -->
+    <section id="emergency" class="py-16 bg-red-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">Emergency Assistance</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-white p-8 rounded-2xl shadow-lg">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6">Quick Emergency Actions</h3>
+                    
+                    <div class="space-y-4">
+                        <button onclick="triggerEmergency()" class="w-full bg-red-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-red-700 transition-colors emergency-pulse flex items-center justify-center gap-2">
+                            <i class="fas fa-bell"></i>
+                            EMERGENCY ALERT
+                        </button>
+                        
+                        <button onclick="shareLocation()" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                            <i class="fas fa-share-alt"></i>
+                            Share Live Location
+                        </button>
+                        
+                        <button onclick="callEmergency()" class="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                            <i class="fas fa-phone"></i>
+                            Call Emergency Services
+                        </button>
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-yellow-50 rounded-lg">
+                        <h4 class="font-semibold text-yellow-800 mb-2">Emergency Contacts</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span>Local Police</span>
+                                <button onclick="callNumber('100')" class="text-blue-600 hover:text-blue-800">Call 100</button>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span>Women Helpline</span>
+                                <button onclick="callNumber('1091')" class="text-blue-600 hover:text-blue-800">Call 1091</button>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span>Ambulance</span>
+                                <button onclick="callNumber('108')" class="text-blue-600 hover:text-blue-800">Call 108</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-8 rounded-2xl shadow-lg">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6">Safety Network</h3>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Add Trusted Contacts</label>
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="Contact Name" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
+                            <input type="tel" placeholder="Phone Number" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
+                            <button class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-gray-800 mb-3">Your Safety Network</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center p-2 bg-white rounded">
+                                <span>Mom - +91 XXXXXXX890</span>
+                                <button class="text-red-600 hover:text-red-800">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="flex justify-between items-center p-2 bg-white rounded">
+                                <span>Friend - +91 XXXXXXX123</span>
+                                <button class="text-red-600 hover:text-red-800">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resources Section -->
+    <section id="resources" class="py-16 bg-gray-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">Safety Resources & Tips</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8 mb-12">
+                <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="text-center mb-4">
+                        <img src="image1.jpg" alt="Illustration of a woman using self-defense techniques in a well-lit urban environment" class="rounded-lg mb-4" />
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Self-Defense Tips</h3>
+                    <p class="text-gray-600 mb-4">Learn basic self-defense techniques and situational awareness strategies to protect yourself in emergency situations.</p>
+                    <button class="text-purple-600 font-semibold hover:text-purple-800">Learn More →</button>
+                </div>
+                
+                <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="text-center mb-4">
+                        <img src="image2.jpg" alt="Digital screen showing safety apps and emergency contact interfaces on a smartphone" class="rounded-lg mb-4" />
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Safety Apps</h3>
+                    <p class="text-gray-600 mb-4">Discover recommended safety applications that provide real-time tracking, emergency alerts, and quick access to help.</p>
+                    <button class="text-purple-600 font-semibold hover:text-purple-800">Explore Apps →</button>
+                </div>
+                
+                <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="text-center mb-4">
+                        <img src="image3.jpg" alt="Community support group meeting with diverse women sharing experiences and support" class="rounded-lg mb-4" />
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Community Support</h3>
+                    <p class="text-gray-600 mb-4">Connect with local support groups, counseling services, and community resources for women's safety and empowerment.</p>
+                    <button class="text-purple-600 font-semibold hover:text-purple-800">Find Support →</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">SafePath</h3>
+                    <p class="text-gray-400">Empowering women with AI-powered safety predictions and emergency assistance.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#home" class="hover:text-white">Home</a></li>
+                        <li><a href="#predict" class="hover:text-white">Safety Predict</a></li>
+                        <li><a href="#emergency" class="hover:text-white">Emergency</a></li>
+                        <li><a href="#resources" class="hover:text-white">Resources</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contact</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Email: support@safepath.com</li>
+                        <li>Phone: +91-XXX-XXX-XXXX</li>
+                        <li>24/7 Helpline: 1091</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Download App</h3>
+                    <div class="flex space-x-2">
+                        <button class="bg-black text-white px-4 py-2 rounded flex items-center">
+                            <i class="fab fa-apple mr-2"></i>
+                            App Store
+                        </button>
+                        <button class="bg-green-600 text-white px-4 py-2 rounded flex items-center">
+                            <i class="fab fa-google-play mr-2"></i>
+                            Play Store
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 SafePath. All rights reserved. Your safety is our mission.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification Container -->
+    <div id="notification" class="notification">
+        <div class="flex items-center">
+            <i class="fas fa-bell text-yellow-500 mr-2"></i>
+            <span id="notificationMessage"></span>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scrolling
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        // Get current location
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        // In a real app, you would reverse geocode this to get address
+                        document.getElementById('currentLocation').value = `Location: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                        showNotification('Location captured successfully');
+                    },
+                    (error) => {
+                        showNotification('Could not get location. Please enter manually.', 'error');
+                    }
+                );
+            } else {
+                showNotification('Geolocation is not supported by this browser', 'error');
+            }
+        }
+
+        // Safety prediction
+        function predictSafety() {
+            const currentLocation = document.getElementById('currentLocation').value;
+            const destination = document.getElementById('destination').value;
+            const travelTime = document.getElementById('travelTime').value;
+            const transportMode = document.getElementById('transportMode').value;
+
+            if (!currentLocation || !destination) {
+                showNotification('Please enter both current location and destination', 'error');
+                return;
+            }
+
+            // Simulate AI prediction (in real app, this would call an API)
+            const safetyLevels = ['Low', 'Moderate', 'High', 'Very High'];
+            const randomLevel = safetyLevels[Math.floor(Math.random() * safetyLevels.length)];
+            const predictions = {
+                'Low': {
+                    color: 'red',
+                    message: 'Exercise extreme caution. Consider alternative routes or times.',
+                    tips: ['Avoid this route if possible', 'Travel with company', 'Share live location with trusted contacts']
+                },
+                'Moderate': {
+                    color: 'orange',
+                    message: 'Generally safe but stay alert. Be aware of your surroundings.',
+                    tips: ['Stay in well-lit areas', 'Keep phone charged', 'Have emergency numbers ready']
+                },
+                'High': {
+                    color: 'blue',
+                    message: 'Good safety conditions. Standard precautions recommended.',
+                    tips: ['Normal safety measures apply', 'Be mindful of time', 'Stay connected']
+                },
+                'Very High': {
+                    color: 'green',
+                    message: 'Excellent safety conditions. Enjoy your journey responsibly.',
+                    tips: ['Minimal concerns', 'Standard urban awareness', 'Enjoy your travel']
+                }
+            };
+
+            const result = predictions[randomLevel];
+            const resultDiv = document.getElementById('predictionResult');
+            
+            resultDiv.className = `text-center py-8 rounded-lg mb-6 safety-${randomLevel.toLowerCase().replace(' ', '-')} text-white`;
+            resultDiv.innerHTML = `
+                <div class="text-4xl mb-2">${randomLevel} Safety</div>
+                <div class="text-xl mb-4">${result.message}</div>
+                <div class="text-6xl mb-4">${getSafetyEmoji(randomLevel)}</div>
+            `;
+
+            // Update safety tips
+            const tipsList = document.querySelector('#safetyTips ul');
+            tipsList.innerHTML = result.tips.map(tip => `
+                <li class="flex items-start">
+                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                    <span>${tip}</span>
+                </li>
+            `).join('');
+
+            showNotification(`Safety prediction: ${randomLevel} risk level`);
+        }
+
+        function getSafetyEmoji(level) {
+            const emojis = {
+                'Low': '😨',
+                'Moderate': '😟',
+                'High': '🙂',
+                'Very High': '😊'
+            };
+            return emojis[level] || '❓';
+        }
+
+        // Emergency functions
+        function triggerEmergency() {
+            if (confirm('This will alert your emergency contacts and share your location. Continue?')) {
+                // Simulate emergency alert
+                showNotification('EMERGENCY ALERT ACTIVATED! Contacts notified.', 'emergency');
+                
+                // In a real app, this would send SMS/email to emergency contacts
+                setTimeout(() => {
+                    alert('Emergency alert sent to your contacts. Help is on the way!');
+                }, 2000);
+            }
+        }
+
+        function shareLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const link = `https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`;
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'My Current Location',
+                            text: 'Here is my current location for safety purposes:',
+                            url: link
+                        });
+                    } else {
+                        prompt('Copy this location link to share:', link);
+                    }
+                });
+            }
+        }
+
+        function callEmergency() {
+            if (confirm('Call emergency services?')) {
+                // This would actually call in a real app with proper phone integration
+                showNotification('Calling emergency services...');
+            }
+        }
+
+        function callNumber(number) {
+            if (confirm(`Call ${number}?`)) {
+                // Phone call simulation
+                showNotification(`Calling ${number}...`);
+            }
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notificationMessage');
+            
+            messageEl.textContent = message;
+            
+            // Set color based on type
+            notification.className = 'notification';
+            if (type === 'error') {
+                notification.style.background = '#fee2e2';
+                notification.style.color = '#dc2626';
+            } else if (type === 'emergency') {
+                notification.style.background = '#fef3c7';
+                notification.style.color = '#d97706';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize time input with current time
+        document.getElementById('travelTime').value = new Date().toTimeString().substring(0, 5);
+
+        function predictSafety() {
+    const currentLocation = document.getElementById('currentLocation').value;
+    const destination = document.getElementById('destination').value;
+    const travelTime = document.getElementById('travelTime').value;
+    const transportMode = document.getElementById('transportMode').value;
+
+    if (!currentLocation || !destination) {
+        showNotification('Please enter both current location and destination', 'error');
+        return;
+    }
+
+    const safetyLevels = ['Low', 'Moderate', 'High', 'Very High'];
+    const randomLevel = safetyLevels[Math.floor(Math.random() * safetyLevels.length)];
+    const predictions = {
+        'Low': {
+            color: 'red',
+            message: 'Exercise extreme caution. Consider alternative routes or times.',
+            tips: ['Avoid this route if possible', 'Travel with company', 'Share live location with trusted contacts'],
+            reasons: [
+                'Heavy traffic and congestion',
+                'Poorly lit or isolated areas',
+                'High crime rate reported recently'
+            ]
+        },
+        'Moderate': {
+            color: 'orange',
+            message: 'Generally safe but stay alert. Be aware of your surroundings.',
+            tips: ['Stay in well-lit areas', 'Keep phone charged', 'Have emergency numbers ready'],
+            reasons: [
+                'Moderate traffic',
+                'Some areas with limited lighting',
+                'Occasional reports of suspicious activity'
+            ]
+        },
+        'High': {
+            color: 'blue',
+            message: 'Good safety conditions. Standard precautions recommended.',
+            tips: ['Normal safety measures apply', 'Be mindful of time', 'Stay connected'],
+            reasons: [
+                'Light traffic',
+                'Well-lit streets',
+                'Regular police patrols'
+            ]
+        },
+        'Very High': {
+            color: 'green',
+            message: 'Excellent safety conditions. Enjoy your journey responsibly.',
+            tips: ['Minimal concerns', 'Standard urban awareness', 'Enjoy your travel'],
+            reasons: [
+                'Low traffic',
+                'Safe neighborhoods',
+                'Active community presence'
+            ]
+        }
+    };
+
+    const result = predictions[randomLevel];
+    const resultDiv = document.getElementById('predictionResult');
+    
+    resultDiv.className = `text-center py-8 rounded-lg mb-6 safety-${randomLevel.toLowerCase().replace(' ', '-')} text-white`;
+    resultDiv.innerHTML = `
+        <div class="text-4xl mb-2">${randomLevel} Safety</div>
+        <div class="text-xl mb-4">${result.message}</div>
+        <div class="text-6xl mb-4">${getSafetyEmoji(randomLevel)}</div>
+        <div class="text-left bg-white bg-opacity-20 p-4 rounded-lg">
+            <h4 class="font-semibold mb-2">Why this safety level?</h4>
+            <ul class="list-disc list-inside text-sm">
+                ${result.reasons.map(reason => `<li>${reason}</li>`).join('')}
+            </ul>
+        </div>
+    `;
+
+    // Update safety tips
+    const tipsList = document.querySelector('#safetyTips ul');
+    tipsList.innerHTML = result.tips.map(tip => `
+        <li class="flex items-start">
+            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+            <span>${tip}</span>
+        </li>
+    `).join('');
+
+    showNotification(`Safety prediction: ${randomLevel} risk level`);
+}
+
+    </script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+<script>
+  function initMap() {
+    const defaultLocation = { lat: 28.6139, lng: 77.2090 }; // Example: New Delhi
+    
+    const map = new google.maps.Map(document.getElementById("map"), {
+      zoom: 13,
+      center: defaultLocation,
+    });
+
+    new google.maps.Marker({
+      position: defaultLocation,
+      map: map,
+      title: "Your Location",
+    });
+  }
+
+  window.onload = initMap;
+</script>
+
+</body>
+</html>
